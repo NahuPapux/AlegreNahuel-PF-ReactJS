@@ -12,6 +12,7 @@ const NavBar = () => {
         <h1>Labial Shop</h1>
         </Link>
       </div>
+        
       <NavBarLink />
       <CartWidget />
     </div>

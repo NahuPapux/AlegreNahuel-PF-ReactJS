@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams} from "react-router-dom";
-import { products } from "../../productsMock";
 import ItemList from "../ItemList/ItemList";
 import ClipLoader from "react-spinners/ClipLoader";
+import { db } from "../../firebaseConfig";
+import {collection, getDocs, query, where} from "firebase/firestore"
 
 const ItemListContainer = () => {
 
@@ -10,23 +11,33 @@ const ItemListContainer = () => {
 
     const [items, setItems] = useState([]);
 
-    const productosFiltrados = products.filter((elemento) => elemento.category === categoryName)
-
     useEffect(() => {
-      const productList = new Promise((resolve,reject) => {
-        setTimeout(()=>{
-          resolve( categoryName ? productosFiltrados : products);
-        }, 4000)  
-      });
+      const itemsCollection = collection(db, "products")
 
-      productList
-        .then((res) => {
-          setItems(res);
+      let consulta = undefined
+
+      if(categoryName){
+        const q = query(itemsCollection, where("category", "==", categoryName))
+            
+        consulta= getDocs(q)
+
+      }else{
+        consulta = getDocs(itemsCollection)
+      }
+
+      consulta.then((res) =>{
+        let products = res.docs.map((products)=>{
+          return {
+            ...products.data(),
+            id: products.id
+          }
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        setItems(products)
+      })
+
     }, [categoryName]);
+
+    if (items.length > 0) return <ItemList items={items}/>
 
     return (
       <div
@@ -40,8 +51,6 @@ const ItemListContainer = () => {
         }}>
           {items.lenght > 0 ? (<ItemList items={items} />) : ( <ClipLoader
           color={"pink"}
-         /*  loading={loading}
-          cssOverride={override} */
           size={150}
           aria-label="Loading Spinner"
           data-testid="loader"

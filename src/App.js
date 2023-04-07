@@ -7,14 +7,6 @@ import CartContextProvider from "./context/CartContext";
 
 function App() {
 
-  const onAdd = (cantidad) =>{
-    console.log('Se agregó al carrito ${cantidad} elementos')
-  }
-
-  let stock = 5
-  
-  let initial = 1   
-
   return (
     <BrowserRouter>
       <CartContextProvider>

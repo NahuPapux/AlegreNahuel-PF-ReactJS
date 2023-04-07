@@ -1,30 +1,59 @@
 
-import React, { useContext } from 'react'
-import ItemCount from '../ItemCount/ItemCount'
+import React, { useContext, useEffect, useState } from 'react'
 import {useParams} from "react-router-dom"
+import Swal from "sweetalert2"
 import { products } from '../../productsMock';
 import { CartContext } from '../../context/CartContext';
+import { getDoc, collection, doc } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import ItemDetail from "../ItemDetail/ItemDetail"
+import ItemCount from   "../ItemCount/ItemCount"
 
 const ItemDetailContainer = () => {
 
     const {id} = useParams();
-    const {agregarAlCarrito} = useContext (CartContext)
-    const productSelected = products.find ( (element) => element.id === Number(id) );
+    const {agregarAlCarrito, getQuantityById} = useContext (CartContext)
+    const [productSelected, setProductSelected] = useState ({})
+
+    useEffect(()=>{
+
+        const ItemCollection = collection(db, "products")
+        const ref = doc(ItemCollection, id )
+        getDoc(ref)
+            .then(res => {
+                setProductSelected({
+                    ...res.data(),
+                    id: res.id,
+                })
+            })
+    },[id])
+
+    /* const productSelected = products.find ( (element) => element.id === Number(id) ); */
     const onAdd = (cantidad)=>{
+        let producto = {
+            ...productSelected,
+            quantity: cantidad,
+        }
 
-        agregarAlCarrito(productSelected)
+        agregarAlCarrito(producto);
+        Swal.fire({
+            position: 'center',
+            icon: 'succes',
+            title: 'Producto agregado exitosamente',
+            showConfirmButton: false,
+            timer: 1500
+        });
 
-    }
+    };
+    let quantity = getQuantityById(Number(id));
     
-    return (     
-        <div>
-                <img src={productSelected.img} alt="" />
-                <h1 >{productSelected.title}</h1>
-                <h3 >{productSelected.description}</h3>
-                <h2 ><span>$</span>{productSelected.price.toFixed(2)}</h2>
-                <ItemCount stock={productSelected.stock} onAdd={onAdd}/>
-        </div>
-    );
-};
+    return (
+        <ItemDetail
+          productSelected={productSelected}
+          onAdd={onAdd}
+          quantity={quantity}
+        />
+      );
+    };
 
 export default ItemDetailContainer

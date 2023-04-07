@@ -1,8 +1,10 @@
+import { BsFillCartCheckFill } from "react-icons/bs";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { Button } from "@mui/material";
 import {useContext} from "react"
 import {Link} from "react-router-dom"
 import { CartContext } from '../../context/CartContext';
+
 
 const CartWidget = () => {
 
@@ -20,7 +22,7 @@ const CartWidget = () => {
         }}
       />
       <div className="bubble-counter">
-        <Button>0</Button>
+        <Button>{total}</Button>
       </div>
 
       </div>
